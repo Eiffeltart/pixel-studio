@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>像素工作室 · 3A之路</title>
+<style>
+  :root {
+    --bg:#0f1220; --panel:#1a1f35; --panel2:#232a4a; --line:#2e3760;
+    --gold:#ffc94d; --blue:#4da3ff; --green:#3ddc84; --text:#e8ebf5;
+    --muted:#8a92b8; --accent:#ff6b6b; --orange:#ff9f43;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, #1a2140 0%, transparent 60%),
+      linear-gradient(180deg,#0b0e1a 0%,#0f1220 100%);
+    color:var(--text); font-family:"Microsoft YaHei","PingFang SC",sans-serif;
+    min-height:100vh; padding:20px; overflow-x:hidden;
+  }
+  /* 背景像素网格 + 星光 */
+  body::before {
+    content:""; position:fixed; inset:0; z-index:-2; pointer-events:none;
+    background-image:
+      linear-gradient(rgba(78,90,140,.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(78,90,140,.08) 1px, transparent 1px);
+    background-size:32px 32px;
+    mask-image:radial-gradient(ellipse 70% 60% at 50% 20%, #000 30%, transparent 80%);
+    -webkit-mask-image:radial-gradient(ellipse 70% 60% at 50% 20%, #000 30%, transparent 80%);
+  }
+  body::after {
+    content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+    background-image:
+      radial-gradient(1.5px 1.5px at 15% 25%, #fff 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 80% 15%, #ffc94d 50%, transparent 51%),
+      radial-gradient(1px 1px at 55% 30%, #4da3ff 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 30% 70%, #fff 50%, transparent 51%),
+      radial-gradient(1px 1px at 90% 60%, #fff 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 70% 80%, #3ddc84 50%, transparent 51%);
+    animation:twinkle 4s ease-in-out infinite alternate;
+  }
+  @keyframes twinkle { from{opacity:.4;} to{opacity:1;} }
+
+  .wrap { max-width:960px; margin:0 auto; }
+
+  /* 像素横幅插画 */
+  .banner { position:relative; margin:0 0 4px; text-align:center; }
+  .banner svg { width:100%; max-width:600px; height:auto; display:block; margin:0 auto; }
+  .banner .cityline { animation:floaty 4s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-3px); } }
+
+  header { text-align:center; padding:10px 0 6px; }
+  header h1 {
+    font-size:26px; letter-spacing:3px; font-weight:bold;
+    text-shadow:0 0 12px rgba(255,201,77,.5), 0 2px 0 rgba(0,0,0,.4);
+  }
+  header h1 span { color:var(--gold); }
+  header .sub { color:var(--muted); font-size:12px; margin-top:4px; }
+
+  .topbar {
+    background:linear-gradient(180deg,#1a1f35,#171c30); border:1px solid var(--line); border-radius:14px;
+    padding:14px 18px; margin:12px 0; display:flex; flex-wrap:wrap; gap:12px;
+    align-items:center; justify-content:center;
+    box-shadow:0 4px 16px rgba(0,0,0,.3);
+  }
+  .stat { text-align:center; min-width:100px; }
+  .stat .val { font-size:22px; font-weight:bold; color:var(--gold); text-shadow:0 0 8px rgba(255,201,77,.4); }
+  .stat .label { font-size:11px; color:var(--muted); margin-top:2px; }
+  .stat.blue .val { color:var(--blue); text-shadow:0 0 8px rgba(77,163,255,.4); }
+  .stat.green .val { color:var(--green); text-shadow:0 0 8px rgba(61,220,132,.4); }
+
+  .clicker { position:relative; text-align:center; margin:6px 0 14px; }
+  #clickBtn {
+    width:150px; height:150px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,#ffdf8a,#f5a623);
+    border:4px solid #ffc94d; color:#5a3a00; font-size:19px; font-weight:bold;
+    cursor:pointer; transition:transform .06s ease;
+    box-shadow:0 6px 24px rgba(245,166,35,.45), inset 0 -6px 12px rgba(120,70,0,.25);
+    display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+    user-select:none; position:relative;
+  }
+  #clickBtn:hover { box-shadow:0 8px 32px rgba(245,166,35,.6), inset 0 -6px 12px rgba(120,70,0,.25); }
+  #clickBtn:active { transform:scale(.94); }
+  #clickBtn .big { font-size:36px; filter:drop-shadow(0 2px 2px rgba(90,58,0,.4)); }
+  #clickBtn .hint { font-size:11px; color:#7a5200; }
+  /* 金币飘字 */
+  .float-coin {
+    position:absolute; font-weight:bold; color:#ffc94d; font-size:20px;
+    pointer-events:none; text-shadow:0 2px 4px rgba(0,0,0,.5);
+    animation:floatUp 0.9s ease-out forwards;
+  }
+  @keyframes floatUp {
+    0% { transform:translate(-50%,0); opacity:1; }
+    100% { transform:translate(-50%,-90px); opacity:0; }
+  }
+
+  /* 关卡面板 */
+  .level-panel {
+    background:linear-gradient(135deg,#1c2340,#232a4a); border:1px solid var(--line);
+    border-radius:14px; padding:18px 20px; margin:8px 0 18px; position:relative; overflow:hidden;
+  }
+  .level-panel::before {
+    content:""; position:absolute; top:-30px; right:-30px; width:120px; height:120px;
+    background:radial-gradient(circle, rgba(255,159,67,.18), transparent 70%);
+    border-radius:50%;
+  }
+  .level-head { display:flex; align-items:center; gap:8px; margin-bottom:6px; position:relative; }
+  .level-head .lv-no { color:var(--orange); font-weight:bold; font-size:14px; }
+  .level-head .lv-title { font-weight:bold; font-size:17px; }
+  .level-head .lv-clear { margin-left:auto; color:var(--green); font-weight:bold; font-size:13px; }
+  .level-goal { font-size:13px; color:var(--blue); margin-bottom:10px; position:relative; }
+  .level-story { font-size:13px; color:#cdd3ea; line-height:1.7; font-style:italic; margin-bottom:12px; position:relative; }
+  .bar { height:16px; background:#0f1220; border-radius:8px; overflow:hidden; border:1px solid var(--line); position:relative; }
+  .bar-fill {
+    height:100%; width:0%; transition:width .3s; border-radius:8px;
+    background:linear-gradient(90deg,#ff9f43,#ffc94d);
+    box-shadow:0 0 10px rgba(255,159,67,.6);
+  }
+  .bar-label { font-size:11px; color:var(--muted); margin-top:4px; text-align:right; position:relative; }
+
+  h2.sec { font-size:15px; margin:20px 0 10px; padding-left:10px; border-left:4px solid var(--blue); letter-spacing:1px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
+  .card {
+    background:linear-gradient(180deg,#1a1f35,#161b2e); border:1px solid var(--line); border-radius:12px;
+    padding:14px 16px; transition:transform .15s, border-color .2s, box-shadow .2s;
+  }
+  .card:hover { transform:translateY(-3px); border-color:#3a4676; box-shadow:0 8px 20px rgba(0,0,0,.4); }
+  .card.locked { opacity:.45; filter:grayscale(.5); }
+  .card.locked:hover { transform:none; }
+  .card .row1 { display:flex; align-items:center; gap:10px; }
+  .card .icon {
+    font-size:26px; width:46px; height:46px; flex:none;
+    display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(135deg,#2c3560,#232a4a); border-radius:10px;
+    box-shadow:inset 0 0 0 1px var(--line);
+  }
+  .card .name { font-weight:bold; font-size:15px; }
+  .card .owned { margin-left:auto; font-size:13px; color:var(--blue); font-weight:bold; }
+  .card .prod { color:var(--green); font-size:12px; margin:8px 0 2px; }
+  .card .cost { color:var(--gold); font-size:12px; }
+  .card button {
+    width:100%; margin-top:10px; padding:9px; border:none; border-radius:8px;
+    background:linear-gradient(180deg,#2c3560,#252d52); color:var(--text); font-weight:bold; cursor:pointer; font-size:13px;
+    transition:filter .15s;
+  }
+  .card button:hover { filter:brightness(1.2); }
+  .card button:disabled { opacity:.4; cursor:not-allowed; }
+
+  .level-list { display:flex; flex-direction:column; gap:8px; }
+  .lv-row {
+    background:var(--panel); border:1px solid var(--line); border-radius:10px;
+    padding:10px 14px; display:flex; align-items:center; gap:10px; font-size:13px;
+  }
+  .lv-row.done { border-color:var(--green); background:#16241d; }
+  .lv-row.done .lv-name::after { content:" ✓"; color:var(--green); }
+  .lv-row.current { border-color:var(--orange); background:#1e2440; box-shadow:0 0 12px rgba(255,159,67,.2); }
+  .lv-row .lv-name { font-weight:bold; }
+  .lv-row .lv-desc { color:var(--muted); font-size:12px; margin-left:auto; }
+
+  .footer { margin:28px 0 10px; padding-top:16px; border-top:1px solid var(--line); display:flex; gap:12px; justify-content:center; flex-wrap:wrap; align-items:center; }
+  .footer button, .footer a { padding:10px 18px; border:none; border-radius:8px; cursor:pointer; font-weight:bold; font-size:13px; text-decoration:none; display:inline-block; transition:filter .15s, transform .15s; }
+  .footer button:hover, .footer a:hover { filter:brightness(1.15); transform:translateY(-2px); }
+  #bizBtn { background:#4da3ff; color:#06162e; }
+  #debugBtn { background:#ff9f43; color:#3a2000; }
+  #resetBtn { background:#2a2f4a; color:var(--muted); }
+
+  /* modal */
+  .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.72); z-index:50; align-items:flex-start; justify-content:center; overflow:auto; padding:30px 16px; }
+  .modal.open { display:flex; }
+  .modal-box { background:var(--panel); border:1px solid var(--line); border-radius:16px; max-width:760px; width:100%; padding:26px 28px; }
+  .modal-box h2 { font-size:19px; color:var(--blue); margin-bottom:6px; }
+  .modal-box h2.orange { color:var(--orange); }
+  .modal-box .lead { color:var(--muted); font-size:13px; margin-bottom:16px; line-height:1.6; }
+  .biz-item { margin-bottom:16px; border-bottom:1px dashed var(--line); padding-bottom:14px; }
+  .biz-item:last-child { border-bottom:none; }
+  .biz-item .b-name { font-weight:bold; font-size:14px; color:var(--gold); }
+  .biz-item .b-what { font-size:13px; margin:4px 0; line-height:1.6; }
+  .biz-item .b-why { font-size:12.5px; color:#b9c0e0; line-height:1.6; }
+  .biz-item .b-why b { color:var(--green); }
+  .close { display:block; margin:18px auto 0; padding:10px 26px; border:none; border-radius:8px; background:var(--panel2); color:var(--text); font-weight:bold; cursor:pointer; }
+
+  /* 调试面板 */
+  .debug-row { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px dashed var(--line); flex-wrap:wrap; }
+  .debug-row label { width:130px; font-size:13px; color:var(--text); }
+  .debug-row input[type=number] {
+    width:110px; background:#0f1220; border:1px solid var(--line); border-radius:6px;
+    color:var(--gold); padding:6px 8px; font-size:13px;
+  }
+  .debug-row .unit { color:var(--muted); font-size:12px; }
+  .debug-row .note { color:var(--muted); font-size:11px; width:100%; }
+  .chart-box { margin-top:14px; }
+  .chart-box canvas { width:100%; height:180px; background:#0f1220; border:1px solid var(--line); border-radius:10px; }
+  @media (max-width:600px) {
+    #clickBtn { width:120px; height:120px; }
+    .grid { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="banner">
+    <svg viewBox="0 0 600 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="像素工作室场景插画">
+      <!-- 背景夜色 -->
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#141a30"/><stop offset="1" stop-color="#0b0e1a"/>
+        </linearGradient>
+        <linearGradient id="mon" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#4da3ff"/><stop offset="1" stop-color="#7a5cff"/>
+        </linearGradient>
+      </defs>
+      <rect x="0" y="0" width="600" height="150" rx="12" fill="url(#sky)" stroke="#2e3760"/>
+      <!-- 星空 -->
+      <g fill="#8a92b8">
+        <rect x="40" y="18" width="3" height="3"/><rect x="120" y="30" width="2" height="2"/>
+        <rect x="520" y="20" width="3" height="3"/><rect x="560" y="42" width="2" height="2"/>
+        <rect x="330" y="12" width="2" height="2"/><rect x="440" y="28" width="2" height="2"/>
+      </g>
+      <!-- 楼群天际线 -->
+      <g fill="#1c2340" class="cityline">
+        <rect x="0" y="110" width="46" height="40"/><rect x="52" y="90" width="34" height="60"/>
+        <rect x="92" y="120" width="40" height="30"/><rect x="138" y="98" width="30" height="52"/>
+        <rect x="458" y="105" width="44" height="45"/><rect x="508" y="88" width="34" height="62"/>
+        <rect x="548" y="118" width="52" height="32"/>
+      </g>
+      <!-- 楼群亮窗 -->
+      <g fill="#ffc94d" opacity="0.75">
+        <rect x="8" y="120" width="6" height="6"/><rect x="24" y="132" width="6" height="6"/>
+        <rect x="62" y="104" width="6" height="6"/><rect x="150" y="112" width="6" height="6"/>
+        <rect x="466" y="118" width="6" height="6"/><rect x="520" y="102" width="6" height="6"/>
+        <rect x="556" y="128" width="6" height="6"/>
+      </g>
+      <!-- 显示器 -->
+      <rect x="168" y="46" width="72" height="54" rx="4" fill="#0f1220" stroke="#4da3ff" stroke-width="2"/>
+      <rect x="174" y="52" width="60" height="42" fill="url(#mon)"/>
+      <rect x="178" y="58" width="14" height="6" fill="#3ddc84"/>
+      <rect x="178" y="70" width="26" height="6" fill="#ffc94d"/>
+      <rect x="178" y="82" width="20" height="6" fill="#e8ebf5"/>
+      <rect x="196" y="100" width="16" height="8" fill="#232a4a"/>
+      <rect x="188" y="108" width="32" height="4" fill="#2c3560"/>
+      <!-- 键盘 -->
+      <rect x="160" y="116" width="52" height="12" rx="2" fill="#232a4a" stroke="#2e3760"/>
+      <!-- 像素小人（坐姿，举臂） -->
+      <g>
+        <rect x="264" y="72" width="16" height="16" rx="2" fill="#ffc94d"/>      <!-- 头 -->
+        <rect x="266" y="76" width="4" height="4" fill="#0f1220"/>             <!-- 眼 -->
+        <rect x="274" y="76" width="4" height="4" fill="#0f1220"/>
+        <rect x="262" y="88" width="20" height="24" fill="#4da3ff"/>           <!-- 身体 -->
+        <rect x="258" y="90" width="6" height="16" fill="#4da3ff"/>            <!-- 左臂 -->
+        <rect x="280" y="90" width="6" height="16" fill="#4da3ff"/>            <!-- 右臂 -->
+        <rect x="284" y="82" width="4" height="10" fill="#4da3ff"/>            <!-- 举起的拳头 -->
+        <rect x="262" y="112" width="8" height="14" fill="#2c3560"/>           <!-- 腿 -->
+        <rect x="274" y="112" width="8" height="14" fill="#2c3560"/>
+      </g>
+      <!-- 飘浮金币 -->
+      <g>
+        <circle cx="336" cy="58" r="9" fill="#ffc94d" stroke="#f5a623" stroke-width="2"/>
+        <text x="336" y="62" font-size="11" text-anchor="middle" fill="#5a3a00" font-weight="bold">¥</text>
+        <circle cx="356" cy="40" r="6" fill="#ffc94d" stroke="#f5a623"/>
+        <text x="356" y="43" font-size="8" text-anchor="middle" fill="#5a3a00" font-weight="bold">¥</text>
+      </g>
+      <!-- 游戏手柄 -->
+      <g>
+        <rect x="392" y="74" width="44" height="18" rx="9" fill="#232a4a" stroke="#4da3ff" stroke-width="2"/>
+        <rect x="386" y="82" width="8" height="10" rx="3" fill="#232a4a" stroke="#4da3ff"/>
+        <rect x="434" y="82" width="8" height="10" rx="3" fill="#232a4a" stroke="#4da3ff"/>
+        <rect x="400" y="80" width="4" height="4" fill="#ffc94d"/><rect x="424" y="80" width="4" height="4" fill="#3ddc84"/>
+      </g>
+      <!-- 上升箭头粒子 -->
+      <g fill="#3ddc84">
+        <rect x="318" y="96" width="3" height="8"/><rect x="324" y="88" width="3" height="8"/>
+        <rect x="330" y="100" width="3" height="6"/>
+      </g>
+    </svg>
+  </div>
+
+  <header>
+    <h1>🎮 像素<span>工作室</span> · 3A之路</h1>
+    <div class="sub">独立游戏工作室经营模拟 · 目标闯关 · 求职作品集 Demo</div>
+  </header>
+
+  <div class="topbar">
+    <div class="stat"><div class="val" id="gold">0</div><div class="label">金币</div></div>
+    <div class="stat green"><div class="val" id="gps">0</div><div class="label">每秒产出</div></div>
+    <div class="stat blue"><div class="val" id="bonus">+0%</div><div class="label">全局加成</div></div>
+    <div class="stat"><div class="val" id="hires">0</div><div class="label">累计招募</div></div>
+  </div>
+
+  <div class="clicker">
+    <div id="clickBtn"><span class="big">⌨️</span><span>写代码</span><span class="hint" id="clickHint">+1 金币</span></div>
+  </div>
+
+  <!-- 关卡面板 -->
+  <div class="level-panel">
+    <div class="level-head">
+      <span class="lv-no" id="lvNo">第 1 关</span>
+      <span class="lv-title" id="lvTitle">车库起航</span>
+      <span class="lv-clear" id="lvClear" style="display:none">✓ 已通关</span>
+    </div>
+    <div class="level-goal" id="lvGoal">目标：累计产出 500 金币</div>
+    <div class="level-story" id="lvStory">"三个人、一台二手电脑，在车库里敲下第一行代码。"</div>
+    <div class="bar"><div class="bar-fill" id="lvBar"></div></div>
+    <div class="bar-label" id="lvBarLabel"></div>
+  </div>
+
+  <h2 class="sec">团队岗位 · 招募与升级</h2>
+  <div class="grid" id="buildings"></div>
+
+  <h2 class="sec">🏆 关卡进度</h2>
+  <div class="level-list" id="levelList"></div>
+
+  <div class="footer">
+    <button id="debugBtn">⚙️ 策划调试面板</button>
+    <button id="bizBtn">📈 商业化设计</button>
+    <a href="design.html" style="padding:10px 18px;border-radius:8px;font-weight:bold;font-size:13px;text-decoration:none;background:#3ddc84;color:#06162e;">📄 查看策划说明</a>
+    <button id="resetBtn">重置存档</button>
+  </div>
+</div>
+
+<!-- 商业化面板 -->
+<div class="modal" id="bizModal">
+  <div class="modal-box">
+    <h2>商业化设计思路</h2>
+    <div class="lead">如果《像素工作室》作为真实产品上线，我会这样设计付费点。每个付费点的设计意图，都对应一种玩家心理或运营目标。</div>
+    <div class="biz-item"><div class="b-name">① 首充礼包（¥6）</div><div class="b-what">首充即送「程序员」×3 + 双倍金币产出 1 小时。</div><div class="b-why"><b>设计意图：</b>极低门槛 + 高性价比，完成"免费→付费"第一次破冰，是留存付费习惯的关键转折点。</div></div>
+    <div class="biz-item"><div class="b-name">② 月卡（¥30 / 30天）</div><div class="b-what">每日登录领取金币 + 离线收益上限翻倍 + 全产出 +10%。</div><div class="b-why"><b>设计意图：</b>用"每日领取"制造登录粘性（留存），用"持续加成"锚定长期价值，是最稳定的持续付费来源。</div></div>
+    <div class="biz-item"><div class="b-name">③ 限时加速道具</div><div class="b-what">售卖"双倍产出 2 小时"等一次性加速卡。</div><div class="b-why"><b>设计意图：</b>瞄准"卡数值瓶颈、急于看到结果"的付费冲动，是放置类最典型的冲动型小额付费。</div></div>
+    <div class="biz-item"><div class="b-name">④ 关卡通关限时礼包</div><div class="b-what">在玩家即将通关（差一点达成目标）时，弹出"限时礼包"。</div><div class="b-why"><b>设计意图：</b>在"差一点就达成"的情绪高点精准推送，转化率远高于常态推送——"One More Turn"目标牵引的商业化落地。</div></div>
+    <div class="biz-item"><div class="b-name">⑤ 广告变现（免费玩家）</div><div class="b-what">看广告获得 2 倍离线收益或临时加速。</div><div class="b-why"><b>设计意图：</b>为不付费玩家提供"用注意力换收益"的通道，保证免费生态有变现出口，并可反向引导付费转化。</div></div>
+    <button class="close" data-close="bizModal">关闭</button>
+  </div>
+</div>
+
+<!-- 调试面板 -->
+<div class="modal" id="debugModal">
+  <div class="modal-box">
+    <h2 class="orange">⚙️ 策划调试面板</h2>
+    <div class="lead">这是给策划/面试官看的核心：你可以<b>实时调整数值参数</b>，改动立即生效，下方曲线实时反映产出变化。体现"数值可调、可验证"的策划能力。</div>
+    <div class="debug-row">
+      <label>成本递增系数</label>
+      <input type="number" id="dGrowth" step="0.01" min="1.01">
+      <span class="unit">（每次招募成本 × 该值）</span>
+      <span class="note">调低=节奏更快更爽，调高=更肝更长线。放置游戏常用 1.1~1.2。</span>
+    </div>
+    <div class="debug-row">
+      <label>离线收益折扣</label>
+      <input type="number" id="dOffline" step="0.05" min="0" max="1">
+      <span class="unit">（0.5 = 离线赚 50%）</span>
+      <span class="note">越低越鼓励在线，越高越友好。用于平衡留存与活跃。</span>
+    </div>
+    <div class="debug-row">
+      <label>点击产出基数</label>
+      <input type="number" id="dClick" step="1" min="1">
+      <span class="unit">金币/次</span>
+    </div>
+    <div id="debugBuildings"></div>
+    <div class="chart-box">
+      <div style="font-size:13px;color:var(--text);margin-bottom:6px;">📊 每秒产出曲线（最近 120 秒）</div>
+      <canvas id="chart" width="700" height="180"></canvas>
+    </div>
+    <button class="close" data-close="debugModal">关闭</button>
+  </div>
+</div>
+
+<script>
+/* ============ 配置（可被调试面板实时修改） ============ */
+const CFG = {
+  growth: 1.15,       // 成本递增系数
+  offlineRate: 0.5,   // 离线收益折扣
+  clickBase: 1,       // 点击产出基数
+  buildings: [
+    { id:'prog',   name:'程序员',   icon:'👨‍💻', baseCost:15,     baseProd:1 },
+    { id:'art',    name:'美术',     icon:'🎨', baseCost:100,    baseProd:6 },
+    { id:'plan',   name:'策划',     icon:'📋', baseCost:700,    baseProd:35 },
+    { id:'op',     name:'运营',     icon:'📈', baseCost:5000,   baseProd:200 },
+    { id:'pub',    name:'发行',     icon:'🚀', baseCost:35000,  baseProd:1200 },
+    { id:'engine', name:'引擎升级', icon:'⚙️', baseCost:250000, baseProd:8000 },
+  ],
+};
+
+/* 关卡：目标闯关式，热血燃向叙事 */
+const LEVELS = [
+  { title:'车库起航',   goal:['gold', 500],     story:'"三个人、一台二手电脑，在车库里敲下第一行代码。别人说国产 3A 是白日梦，我们偏要证明给他们看。"' },
+  { title:'招兵买马',   goal:['hires', 8],      story:'"一个人的热爱会孤独，一群人的热爱能燎原。我们开始招兵买马，哪怕只是多一双写代码的手。"' },
+  { title:'小作坊成型', goal:['gps', 15],       story:'"从接外包糊口，到能喘口气。离梦想还很远，但至少，我们活下来了，而且没人掉队。"' },
+  { title:'第一款爆款', goal:['gold', 30000],   story:'"第一款游戏冲上首页那天，我们抱在一起哭了。原来坚持这件事，真的能被看见。"' },
+  { title:'完整团队',   goal:['hires', 35],     story:'"不再只是程序员和美术。策划、运营、发行，一个 3A 的梦，需要一整个军团来扛。"' },
+  { title:'行业认可',   goal:['gps', 300],      story:'"我们拿了第一个奖。台下有人小声说：这些中国人，好像真的有点东西。"' },
+  { title:'千万玩家',   goal:['gold', 2000000], story:'"玩家破千万的那晚，服务器被挤爆了。我们第一次觉得，3A 两个字，离我们那么近。"' },
+  { title:'百人工作室', goal:['hires', 120],    story:'"从三个人到一百人，唯一没变的，是那台还摆在展厅正中央的二手电脑。"' },
+  { title:'工业化能力', goal:['gps', 5000],     story:'"我们终于有底气说出那句话：国产游戏，也能做出世界级品质。"' },
+  { title:'3A 封神',    goal:['gold', 100000000], story:'"这一刻，我们把中国人的名字，刻进了 3A 的历史。梦，做完了。"' },
+];
+
+const $ = id => document.getElementById(id);
+const fmt = n => {
+  if (n < 1000) return Math.floor(n).toString();
+  const u = ['K','M','B','T','Qa'];
+  let i = -1, v = n;
+  while (v >= 1000 && i < u.length-1) { v /= 1000; i++; }
+  return v.toFixed(v < 10 ? 2 : 1) + u[i];
+};
+
+/* ============ 状态 ============ */
+let state = {
+  gold: 0,
+  lifetimeGold: 0,   // 累计产出金币（用于关卡）
+  lifetimeHires: 0,  // 累计招募数（用于关卡）
+  buildings: CFG.buildings.map(b => ({ id:b.id, owned:0 })),
+  level: 0,          // 当前关卡索引（已完成关数）
+  bonus: 0,
+  lastSeen: Date.now(),
+};
+let history = [];    // 每秒产出曲线
+
+/* ============ 计算 ============ */
+function costOf(b, owned) { return Math.floor(b.baseCost * Math.pow(CFG.growth, owned)); }
+function prodOf(b, owned) { return b.baseProd * owned; }
+function totalGPS() {
+  let sum = 0;
+  for (const b of CFG.buildings) {
+    const ob = state.buildings.find(o => o.id === b.id);
+    sum += prodOf(b, ob.owned);
+  }
+  return sum * (1 + state.bonus);
+}
+function clickValue() { return Math.floor(CFG.clickBase * (1 + state.bonus) + CFG.clickBase); }
+
+function currentLevel() { return state.level < LEVELS.length ? LEVELS[state.level] : null; }
+function levelProgress(lv) {
+  const [type, target] = lv.goal;
+  if (type === 'gold') return state.lifetimeGold;
+  if (type === 'gps') return totalGPS();
+  if (type === 'hires') return state.lifetimeHires;
+  return 0;
+}
+function checkLevel() {
+  const lv = currentLevel();
+  if (!lv) return;
+  if (levelProgress(lv) >= lv.goal[1]) {
+    state.bonus += 0.05;   // 每关 +5% 永久加成
+    state.level++;
+    save();
+    const next = currentLevel();
+    if (next) {
+      setTimeout(() => alert(`🏆 关卡达成！${lv.title} ✓\n永久产出 +5%\n\n下一关「${next.title}」\n${next.story}`), 60);
+    } else {
+      setTimeout(() => alert('🎉 恭喜！你走完了 3A 之路！'), 60);
+    }
+  }
+}
+
+/* ============ 渲染 ============ */
+function render() {
+  $('gold').textContent = fmt(state.gold);
+  $('gps').textContent = fmt(totalGPS());
+  $('bonus').textContent = '+' + Math.round(state.bonus*100) + '%';
+  $('hires').textContent = state.lifetimeHires;
+  $('clickHint').textContent = '+' + clickValue() + ' 金币';
+
+  // 关卡面板
+  const lv = currentLevel();
+  if (lv) {
+    $('lvNo').textContent = '第 ' + (state.level+1) + ' 关';
+    $('lvTitle').textContent = lv.title;
+    $('lvStory').textContent = lv.story;
+    $('lvGoal').textContent = goalText(lv);
+    const prog = levelProgress(lv);
+    const pct = Math.min(100, prog / lv.goal[1] * 100);
+    $('lvBar').style.width = pct + '%';
+    $('lvBarLabel').textContent = fmt(prog) + ' / ' + fmt(lv.goal[1]) + '（' + pct.toFixed(1) + '%）';
+    $('lvClear').style.display = 'none';
+  } else {
+    $('lvNo').textContent = '已完成';
+    $('lvTitle').textContent = '3A 封神';
+    $('lvStory').textContent = '"梦，做完了。但这只是下一个梦的开始。"';
+    $('lvGoal').textContent = '全部关卡已通关';
+    $('lvBar').style.width = '100%';
+    $('lvBarLabel').textContent = '100%';
+    $('lvClear').style.display = 'inline';
+  }
+
+  // 岗位
+  const grid = $('buildings');
+  grid.innerHTML = '';
+  CFG.buildings.forEach((b, i) => {
+    const ob = state.buildings.find(o => o.id === b.id);
+    const cost = costOf(b, ob.owned);
+    const prod = prodOf(b, ob.owned);
+    const visible = i === 0 || state.buildings.find(o => o.id === CFG.buildings[i-1].id).owned > 0;
+    const card = document.createElement('div');
+    card.className = 'card' + (visible ? '' : ' locked');
+    card.innerHTML = `
+      <div class="row1"><div class="icon">${b.icon}</div><div class="name">${b.name}</div><div class="owned">×${ob.owned}</div></div>
+      <div class="prod">产出 ${fmt(prod)}/秒</div>
+      <div class="cost">招募成本 ${fmt(cost)} 金币</div>
+      <button ${state.gold >= cost ? '' : 'disabled'}>招募 1 名</button>
+    `;
+    if (visible) card.querySelector('button').onclick = () => buy(b.id);
+    grid.appendChild(card);
+  });
+
+  // 关卡列表
+  const list = $('levelList');
+  list.innerHTML = '';
+  LEVELS.forEach((l, i) => {
+    const row = document.createElement('div');
+    row.className = 'lv-row' + (i < state.level ? ' done' : (i === state.level ? ' current' : ''));
+    row.innerHTML = `<span class="lv-name">第${i+1}关 ${l.title}</span><span class="lv-desc">${goalText(l)}</span>`;
+    list.appendChild(row);
+  });
+}
+function goalText(lv) {
+  const [type, target] = lv.goal;
+  if (type === 'gold') return '累计产出 ' + fmt(target) + ' 金币';
+  if (type === 'gps') return '每秒产出达到 ' + fmt(target);
+  if (type === 'hires') return '累计招募 ' + target + ' 名岗位';
+  return '';
+}
+
+/* ============ 操作 ============ */
+function buy(id) {
+  const b = CFG.buildings.find(x => x.id === id);
+  const ob = state.buildings.find(o => o.id === id);
+  const cost = costOf(b, ob.owned);
+  if (state.gold >= cost) {
+    state.gold -= cost;
+    ob.owned++;
+    state.lifetimeHires++;
+    render(); save(); checkLevel();
+  }
+}
+
+/* ============ 存档 / 离线 ============ */
+const KEY = 'pixel_studio_save_v2';
+function save() {
+  state.lastSeen = Date.now();
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e) {}
+}
+function load() {
+  let raw = null;
+  try { raw = localStorage.getItem(KEY); } catch(e) {}
+  if (!raw) return;
+  try {
+    const s = JSON.parse(raw);
+    const elapsed = (Date.now() - (s.lastSeen || Date.now())) / 1000;
+    state = Object.assign(state, s);   // 先恢复存档
+    const gpsAtSave = totalGPS();      // 再用恢复后的状态计算离线收益
+    const offlineGain = Math.floor(gpsAtSave * elapsed * CFG.offlineRate);
+    if (offlineGain > 0 && elapsed > 60) {
+      state.gold += offlineGain;
+      state.lifetimeGold += offlineGain;
+      const h = Math.floor(elapsed/3600), m = Math.floor((elapsed%3600)/60);
+      const t = h > 0 ? `${h}小时${m}分` : `${m}分钟`;
+      setTimeout(() => alert(`👋 欢迎回来！离线 ${t}，工作室为你赚了 ${fmt(offlineGain)} 金币`), 100);
+    }
+  } catch(e) {}
+}
+
+/* ============ 主循环 ============ */
+setInterval(() => {
+  const g = totalGPS();
+  state.gold += g;
+  state.lifetimeGold += g;
+  history.push(g);
+  if (history.length > 120) history.shift();
+  render();
+  drawChart();
+  checkLevel();
+}, 1000);
+setInterval(save, 5000);
+
+/* ============ 交互 ============ */
+$('clickBtn').addEventListener('click', () => {
+  const v = clickValue();
+  state.gold += v;
+  state.lifetimeGold += v;
+  spawnCoin(v);
+  render(); save(); checkLevel();
+});
+function spawnCoin(v) {
+  const el = document.createElement('span');
+  el.className = 'float-coin';
+  el.textContent = '+' + fmt(v) + '🪙';
+  el.style.left = (Math.random() * 60 + 20) + '%';
+  el.style.top = '20%';
+  $('clickBtn').appendChild(el);
+  setTimeout(() => el.remove(), 900);
+}
+function openModal(id) { $(id).classList.add('open'); }
+function closeModal(id) { $(id).classList.remove('open'); }
+$('bizBtn').onclick = () => openModal('bizModal');
+$('debugBtn').onclick = () => { buildDebugPanel(); openModal('debugModal'); };
+document.querySelectorAll('.close').forEach(btn => btn.onclick = () => closeModal(btn.dataset.close));
+document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }));
+$('resetBtn').onclick = () => { if (confirm('确定重置所有进度？')) { localStorage.removeItem(KEY); location.reload(); } };
+
+/* ============ 调试面板 ============ */
+function buildDebugPanel() {
+  $('dGrowth').value = CFG.growth;
+  $('dOffline').value = CFG.offlineRate;
+  $('dClick').value = CFG.clickBase;
+  const box = $('debugBuildings');
+  box.innerHTML = '';
+  CFG.buildings.forEach(b => {
+    const row = document.createElement('div');
+    row.className = 'debug-row';
+    row.innerHTML = `
+      <label>${b.icon} ${b.name}</label>
+      <span class="unit">成本</span><input type="number" id="dc_${b.id}" value="${b.baseCost}">
+      <span class="unit">产出/秒</span><input type="number" id="dp_${b.id}" value="${b.baseProd}">
+    `;
+    box.appendChild(row);
+  });
+  $('dGrowth').oninput = () => { CFG.growth = parseFloat($('dGrowth').value) || 1.15; render(); };
+  $('dOffline').oninput = () => { CFG.offlineRate = parseFloat($('dOffline').value) || 0.5; };
+  $('dClick').oninput = () => { CFG.clickBase = parseFloat($('dClick').value) || 1; render(); };
+  CFG.buildings.forEach(b => {
+    $('dc_' + b.id).oninput = () => { b.baseCost = parseFloat($('dc_' + b.id).value) || b.baseCost; render(); };
+    $('dp_' + b.id).oninput = () => { b.baseProd = parseFloat($('dp_' + b.id).value) || b.baseProd; render(); };
+  });
+}
+
+/* ============ 产出曲线 ============ */
+function drawChart() {
+  const cv = $('chart');
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#0f1220'; ctx.fillRect(0, 0, W, H);
+  if (history.length < 2) return;
+  const max = Math.max(...history, 1);
+  const pad = 20;
+  ctx.strokeStyle = '#3ddc84'; ctx.lineWidth = 2; ctx.beginPath();
+  history.forEach((v, i) => {
+    const x = pad + i / (119) * (W - pad*2);
+    const y = H - pad - (v / max) * (H - pad*2);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+  // 网格 + 最大值标注
+  ctx.fillStyle = '#8a92b8'; ctx.font = '12px sans-serif';
+  ctx.fillText('峰值 ' + fmt(max) + '/秒', W - 100, pad - 4);
+}
+
+/* ============ 启动 ============ */
+load();
+render();
+drawChart();
+</script>
+</body>
+</html>
