@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>策划说明 · 像素工作室</title>
+<style>
+  :root {
+    --bg:#0f1220; --panel:#1a1f35; --panel2:#232a4a; --line:#2e3760;
+    --gold:#ffc94d; --blue:#4da3ff; --green:#3ddc84; --text:#e8ebf5;
+    --muted:#8a92b8; --orange:#ff9f43;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:linear-gradient(180deg,#0b0e1a 0%,#0f1220 100%);
+    color:var(--text); font-family:"Microsoft YaHei","PingFang SC",sans-serif;
+    line-height:1.8; padding:20px;
+  }
+  .wrap { max-width:860px; margin:0 auto; }
+  header { text-align:center; padding:26px 0 8px; }
+  header h1 { font-size:26px; letter-spacing:2px; }
+  header h1 span { color:var(--gold); }
+  header .sub { color:var(--muted); font-size:12px; margin-top:6px; }
+  .back { text-align:center; margin:16px 0 6px; }
+  .back a {
+    display:inline-block; padding:10px 22px; border-radius:8px; text-decoration:none;
+    background:var(--blue); color:#06162e; font-weight:bold; font-size:13px;
+  }
+  h2 {
+    font-size:17px; color:var(--blue); margin:30px 0 12px; padding-left:10px;
+    border-left:4px solid var(--blue);
+  }
+  h3 { font-size:14px; color:var(--gold); margin:18px 0 8px; }
+  p { font-size:13.5px; margin:8px 0; color:#d5daf0; }
+  blockquote {
+    border-left:3px solid var(--line); padding:8px 14px; margin:12px 0;
+    background:var(--panel); border-radius:0 8px 8px 0; font-size:13px; color:#c0c6e0;
+  }
+  table { width:100%; border-collapse:collapse; margin:12px 0; font-size:12.5px; }
+  th, td { border:1px solid var(--line); padding:8px 12px; text-align:left; }
+  th { background:#1c2340; color:var(--gold); font-weight:bold; }
+  td { color:#d5daf0; }
+  tr:nth-child(even) td { background:#151a2e; }
+  ul, ol { margin:8px 0 8px 22px; font-size:13.5px; color:#d5daf0; }
+  li { margin:5px 0; }
+  code {
+    background:#0f1220; border:1px solid var(--line); border-radius:4px;
+    padding:1px 6px; font-size:12px; color:var(--green); font-family:Consolas,monospace;
+  }
+  .flow {
+    background:var(--panel); border:1px solid var(--line); border-radius:10px;
+    padding:14px 18px; margin:12px 0; text-align:center; font-size:13px; color:var(--green);
+    font-family:Consolas,monospace; line-height:2;
+  }
+  .tag { display:inline-block; background:var(--green); color:#06162e; font-size:11px; font-weight:bold; border-radius:3px; padding:1px 8px; margin-right:6px; }
+  footer { text-align:center; color:var(--muted); font-size:11px; margin:34px 0 10px; padding-top:16px; border-top:1px solid var(--line); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🎮 像素<span>工作室</span> · 3A之路</h1>
+    <div class="sub">策划说明 · 目标闯关式放置经营模拟 · 作者：任健清 · 求职方向：游戏运营 / 商业化策划</div>
+  </header>
+  <div class="back"><a href="index.html">▶ 返回游戏</a></div>
+
+  <h2>一、产品定位与核心循环</h2>
+  <p><b>一句话定位</b>：让玩家扮演一个从车库起步的独立游戏工作室创始人，通过挂机经营、招募团队、达成里程碑目标，最终走完"3A 封神"之路。</p>
+  <p><b>核心循环（Core Loop）</b>：</p>
+  <div class="flow">点击/挂机产出金币 → 招募岗位提升每秒产出 → 达成关卡目标 → 通关解锁叙事+永久加成 → 冲击更高目标</div>
+
+  <table>
+    <tr><th>环节</th><th>对应机制</th><th>策划目的</th></tr>
+    <tr><td>产出金币</td><td>手动点击 + 自动挂机</td><td>前期给"即时反馈"，后期交给"时间积累"，平滑过渡</td></tr>
+    <tr><td>招募岗位</td><td>6 种岗位，成本/产出递增</td><td>提供"成长感"与"选择感"（攒钱买贵的 or 铺量买便宜的）</td></tr>
+    <tr><td>达成目标</td><td>10 关递进，目标类型轮换</td><td>制造持续牵引的"下一个目标"（One More Turn）</td></tr>
+    <tr><td>永久加成</td><td>每关 +5% 全局产出</td><td>让通关有实打实的"复利"回报，强化正反馈</td></tr>
+  </table>
+
+  <h2>二、数值设计（核心部分）</h2>
+  <h3>2.1 岗位数值表</h3>
+  <table>
+    <tr><th>岗位</th><th>基础成本</th><th>基础产出/秒</th><th>解锁条件</th></tr>
+    <tr><td>程序员</td><td>15</td><td>1</td><td>初始</td></tr>
+    <tr><td>美术</td><td>100</td><td>6</td><td>拥有程序员 ≥1</td></tr>
+    <tr><td>策划</td><td>700</td><td>35</td><td>拥有美术 ≥1</td></tr>
+    <tr><td>运营</td><td>5,000</td><td>200</td><td>拥有策划 ≥1</td></tr>
+    <tr><td>发行</td><td>35,000</td><td>1,200</td><td>拥有运营 ≥1</td></tr>
+    <tr><td>引擎升级</td><td>250,000</td><td>8,000</td><td>拥有发行 ≥1</td></tr>
+  </table>
+  <p><b>成本公式</b>：<code>成本 = 基础成本 × 1.15^(已拥有数量)</code><br>
+  <b>产出公式</b>：<code>产出 = 基础产出 × 已拥有数量</code></p>
+
+  <h3>2.2 设计意图（为什么这样设）</h3>
+  <ol>
+    <li><b>成本递增系数 1.15</b>：放置游戏最常用的"软性减速"。1.15 意味着每买 5 个同类岗位成本约翻一倍，玩家永远处在"差一点点就能买下一个"的追赶状态——这是放置品类留存的核心心理引擎。</li>
+    <li><b>产出线性、成本指数</b>：保证"越买越难"的同时"越买越值"，形成经典的边际收益递减曲线，避免玩家无限堆一个岗位。</li>
+    <li><b>岗位解锁依赖前置</b>：买了程序员才能见美术，形成清晰的"内容揭示节奏"，让玩家有持续新鲜感。</li>
+    <li><b>数值全部可实时调整</b>：成本系数、每个岗位的成本和产出都能在游戏内"策划调试面板"改，改动立即生效、产出曲线实时反映——演示的就是"数值调优"的完整工作方式。</li>
+  </ol>
+
+  <h3>2.3 关卡数值（目标闯关式）</h3>
+  <table>
+    <tr><th>关卡</th><th>标题</th><th>目标</th><th>类型</th></tr>
+    <tr><td>1</td><td>车库起航</td><td>累计产出 500 金币</td><td>累计产出</td></tr>
+    <tr><td>2</td><td>招兵买马</td><td>累计招募 8 名</td><td>累计招募</td></tr>
+    <tr><td>3</td><td>小作坊成型</td><td>每秒产出 15</td><td>瞬时产出</td></tr>
+    <tr><td>4</td><td>第一款爆款</td><td>累计产出 30,000</td><td>累计产出</td></tr>
+    <tr><td>5</td><td>完整团队</td><td>累计招募 35 名</td><td>累计招募</td></tr>
+    <tr><td>6</td><td>行业认可</td><td>每秒产出 300</td><td>瞬时产出</td></tr>
+    <tr><td>7</td><td>千万玩家</td><td>累计产出 2,000,000</td><td>累计产出</td></tr>
+    <tr><td>8</td><td>百人工作室</td><td>累计招募 120 名</td><td>累计招募</td></tr>
+    <tr><td>9</td><td>工业化能力</td><td>每秒产出 5,000</td><td>瞬时产出</td></tr>
+    <tr><td>10</td><td>3A 封神</td><td>累计产出 100,000,000</td><td>累计产出</td></tr>
+  </table>
+  <p><b>目标类型轮换</b>（累计产出 → 累计招募 → 瞬时产出）是刻意的：避免玩家只盯着一个指标，让"招募"和"产出"两条成长线交替成为阶段重点，节奏更有变化。</p>
+
+  <h2>三、叙事设计（热血燃向）</h2>
+  <p>叙事采用<b>"一句话燃点"</b>嵌入每个关卡，而非长篇剧情：</p>
+  <blockquote>第 1 关："三个人、一台二手电脑，在车库里敲下第一行代码。别人说国产 3A 是白日梦，我们偏要证明给他们看。"</blockquote>
+  <blockquote>第 10 关："这一刻，我们把中国人的名字，刻进了 3A 的历史。梦，做完了。"</blockquote>
+  <p><b>为什么用"一句话"而非完整剧情</b>：放置游戏玩家注意力碎片化，长文本会被跳过。一句话燃点既能建立情绪共鸣，又不打断挂机节奏——<b>内容要为节奏服务，而不是反过来</b>。</p>
+
+  <h2>四、商业化设计</h2>
+  <p>完整付费点设计已内嵌在游戏里（「商业化设计」面板），共 5 个付费点，每个都标注设计意图：</p>
+  <table>
+    <tr><th>付费点</th><th>设计意图</th></tr>
+    <tr><td>首充礼包（¥6）</td><td>极低门槛完成"免费→付费"破冰</td></tr>
+    <tr><td>月卡（¥30/30天）</td><td>用"每日领取"做登录粘性，最稳定的持续付费来源</td></tr>
+    <tr><td>限时加速道具</td><td>瞄准"卡数值瓶颈"的冲动型小额付费</td></tr>
+    <tr><td>关卡通关限时礼包</td><td>在"差一点就达成"的情绪高点精准推送（One More Turn 商业化落地）</td></tr>
+    <tr><td>广告变现</td><td>为免费玩家提供"注意力换收益"通道，反向引导付费转化</td></tr>
+  </table>
+
+  <h2>五、留存与增长设计</h2>
+  <ul>
+    <li><b>离线收益</b>（50% 折扣）：重新打开时结算离线产出，制造"回来看看"的理由，放置品类最核心的留存钩子。</li>
+    <li><b>关卡目标牵引</b>：10 关层层递进，永远有一个"差一点就达成"的目标挂在玩家面前。</li>
+    <li><b>永久加成复利</b>：每关 +5% 累积，让老玩家感受到"我的积累在增值"，强化不舍得流失的心理。</li>
+  </ul>
+
+  <h2>六、这个作品想证明什么</h2>
+  <ul>
+    <li><span class="tag">数值</span>能做数值设计：完整的成本/产出曲线、递增系数、关卡目标，且全部可实时调优验证。</li>
+    <li><span class="tag">留存</span>懂留存与付费：离线收益、目标牵引、付费点分层，每个机制都能说出"为什么"。</li>
+    <li><span class="tag">落地</span>具备落地能力：不只会写方案，还能用代码做出可玩 demo（HTML/JS）。</li>
+    <li><span class="tag">游戏感</span>有游戏感：热血燃向叙事、岗位解锁的揭示节奏，都来自真实玩家体感。</li>
+  </ul>
+
+  <h2>七、后续可扩展方向</h2>
+  <ul>
+    <li>加入"转生/重生"系统（prestige），用更高维度数值成长拉长生命周期</li>
+    <li>加入随机事件（如"版号卡审"、"被大厂挖角"），增加叙事波动</li>
+    <li>用 Canvas 做更完整可视化，接入后端存档</li>
+    <li>加入成就系统、每日任务等留存体系</li>
+  </ul>
+
+  <footer>任健清 · 求职作品集 · 游戏运营 / 商业化策划方向</footer>
+</div>
+</body>
+</html>
